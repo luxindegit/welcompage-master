@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -90,6 +91,9 @@ public class MainActivity extends FragmentActivity {
         mPager.bringToFront();
     }
 
+    /**
+     * 初始化底部标签栏
+     */
     private void setIndicatorLayout() {
 
         int dotsCount = NUM_PAGES;
@@ -97,11 +101,11 @@ public class MainActivity extends FragmentActivity {
         for (int i = 0; i < dotsCount; i++) {
 
             mIndicatorView[i] = new TextView(this);
-            mIndicatorView[i].setWidth((int)getResources().getDimension(R.dimen.dimen_12));
-            mIndicatorView[i].setHeight((int)getResources().getDimension(R.dimen.dimen_12));
+            mIndicatorView[i].setWidth((int) getResources().getDimension(R.dimen.dimen_12));
+            mIndicatorView[i].setHeight((int) getResources().getDimension(R.dimen.dimen_12));
             mIndicatorView[i].setGravity(Gravity.CENTER);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            params.setMargins(0, 0, (int)getResources().getDimension(R.dimen.dimen_15), 0);
+            params.setMargins(0, 0, (int) getResources().getDimension(R.dimen.dimen_15), 0);
             mIndicatorView[i].setLayoutParams(params);
             mIndicatorView[i].setBackgroundResource(R.drawable.rounded_cell_gray);
             mIndicatorLayout.addView(mIndicatorView[i]);
@@ -114,6 +118,11 @@ public class MainActivity extends FragmentActivity {
         mIndicatorView[0].setGravity(Gravity.CENTER);
     }
 
+    /**
+     * 页面滑动监听
+     *
+     * @param viewPager
+     */
     private void setPageChangeListener(ViewPager viewPager) {
 
 
@@ -121,10 +130,16 @@ public class MainActivity extends FragmentActivity {
 
             int oldPos = mPager.getCurrentItem();
 
+            /**
+             * 页面滑动的时候触发
+             * @param position  第几个页面
+             * @param positionOffset   滑动终止的点
+             * @param positionOffsetPixels
+             */
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-                // Scrollling left or right
+                // Scrollling left or right  判断向左还是向右滑动
                 if ((positionOffset > mPreviousPositionOffset && position == mPreviousPosition) || (positionOffset < mPreviousPositionOffset && position > mPreviousPosition)) {
                     mViewPagerScrollingLeft = true;
                 } else if (positionOffset < mPreviousPositionOffset) {
@@ -145,6 +160,10 @@ public class MainActivity extends FragmentActivity {
 
             }
 
+            /**
+             * 只有当一个页面完全占据屏幕的时候才出发这个方法
+             * @param position
+             */
             @Override
             public void onPageSelected(int position) {
 
@@ -172,12 +191,16 @@ public class MainActivity extends FragmentActivity {
                 mIndicatorView[position].setBackgroundResource(R.drawable.rounded_cell_red);
             }
 
-
+            /**
+             * 判断当前的滑动状态  正在拖动  空闲
+             * @param state
+             */
             @Override
             public void onPageScrollStateChanged(int state) {
-
+//正在滑动
                 if (state == ViewPager.SCROLL_STATE_DRAGGING) {
                     mShouldSpheresRotate = false;
+                    //空闲
                 } else if (state == ViewPager.SCROLL_STATE_IDLE) {
                     mShouldSpheresRotate = true;
                 }
@@ -209,7 +232,6 @@ public class MainActivity extends FragmentActivity {
         mQuoteImage.setX(mOriginalXValuesMap.get(mQuoteImage));
         mMapImage.setX(mOriginalXValuesMap.get(mMapImage));
         mWordPressImage.setX(mOriginalXValuesMap.get(mWordPressImage));
-
         initializeAlpha();
 
     }
@@ -224,7 +246,6 @@ public class MainActivity extends FragmentActivity {
 
         @Override
         public Fragment getItem(int position) {
-
             ScreenSlideFragment fragment = new ScreenSlideFragment();
             Bundle args = new Bundle();
             args.putInt("position", position);
@@ -243,7 +264,7 @@ public class MainActivity extends FragmentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-       // getMenuInflater().inflate(R.menu.menu_main, menu);
+        // getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -252,7 +273,7 @@ public class MainActivity extends FragmentActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-     //   int id = item.getItemId();
+        //   int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
 //        if (id == R.id.action_settings) {
@@ -262,7 +283,9 @@ public class MainActivity extends FragmentActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
+    /**
+     * 自定义Viewpager的页面切换效果
+     */
     private class CustomTransformer implements ViewPager.PageTransformer {
 
 
@@ -435,6 +458,10 @@ public class MainActivity extends FragmentActivity {
 
     }
 
+    /**
+     * 得到第二页的初始位置
+     * @param savedInstanceState
+     */
     private void getOriginalXValues(Bundle savedInstanceState) {
 
         mOriginalXValuesMap.put(mCenterBox, mCenterBox.getX());
@@ -453,6 +480,9 @@ public class MainActivity extends FragmentActivity {
 
     }
 
+    /**
+     * 初始化第一个欢迎页面图片的透明度
+     */
     private void initializeAlpha() {
 
         mCamcordImage.setAlpha(0f);
@@ -464,8 +494,10 @@ public class MainActivity extends FragmentActivity {
         mWordPressImage.setAlpha(0f);
     }
 
+    /**
+     * 颜色淡下去的动画
+     */
     private void doFadeAnimation() {
-
 
         ObjectAnimator fadeCamcord = ObjectAnimator.ofFloat(mCamcordImage, "alpha", 0f, 1f);
         fadeCamcord.setDuration(700);
@@ -488,7 +520,7 @@ public class MainActivity extends FragmentActivity {
         ObjectAnimator fadeWordpress = ObjectAnimator.ofFloat(mWordPressImage, "alpha", 0f, 1f);
         fadeWordpress.setDuration(700);
 
-        //1 5    3 2  7 6  4
+     //1 5    3 2  7 6  4
 
         mAnimatorSet = new AnimatorSet();
         fadeAudio.setStartDelay(50);
